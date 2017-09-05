@@ -10,7 +10,7 @@ class D2OReader
 		'-4' => 	array('Double', 	''),
 		'-5' => 	array('I18N', 		'readInt'),
 		'-6' => 	array('UInt', 		'readShort'),
-		'-99' => 	array('List', 		'readObject')
+		'-99' => 	array('List', 		'readList')
 	);
 	private $offset = 0;
 	private $data;
@@ -30,6 +30,26 @@ class D2OReader
 		if ($v['type'] == -99) $this->readVector($ret);
 		return $ret;
 	}
+	private function readList($field, $dim=0)
+	{
+		$ret = array();
+		$count = $this->readInt();
+		for ($i=0; $i < $count; ++$i)
+		{
+			$type = $field['vectorTypes'][$dim]['type'];
+			if ($type > 0)
+			{
+				$c = @$this->classes[$this->readInt() -1];
+				if($c==null)$c=null; //Important car ==check by val (!===type)
+				if($c != null) $c = $this->readObject($c);
+				$ret[] = $c;
+			} else {
+				$func =  self::$D2OFieldType[ ($type.'') ][1];
+				$ret[] =  $this->$func($field, $dim+1);
+			}
+		}
+		return $ret;
+	}
 	private function readObject(&$obj = null)
 	{
 		
@@ -44,13 +64,16 @@ class D2OReader
 			
 			if($fieldType>0)
 			{
+				var_dump('YOOOOOOOOOOOOOOO!');
 				$cId = $this->readInt();
 				$ret[ $field['name'] ] = $this->readObject( $this->classes[$cId - 1], $this->classes);
 				continue;
 			}
 			$func =  self::$D2OFieldType[ ($fieldType.'') ][1];
-			var_dump($func . ' -> '. $fieldType);
-			$ret[ $field['name'] ] = $this->$func();
+			//var_dump($func . ' -> '. $fieldType);
+			
+			
+			$ret[ $field['name'] ] = $this->$func($field);
 		}
 		return $ret;
 	}
@@ -79,7 +102,6 @@ class D2OReader
 		
 		
 		//Classes Definition
-		$classes = array();
 		$classesSize = $this->readInt();
 		for($i=0; $i<$classesSize; ++$i)
 		{
@@ -91,12 +113,11 @@ class D2OReader
 				$c['fields'][] = array (
 					'name' => $this->readUtf(),
 					'type' =>  $t = $this->readInt(),
-					'vectorTypes' => $t == -99 && $this->readVector( $a )
+					'vectorTypes' => ($t == -99 ? $this->readVector( $a ) : false)
 				);
 			}
-			$classes[$cId-1] = $c;
+			$this->classes[$cId-1] = $c;
 		}
-		$this->classes = $classes;
 		
 		
 		//Class Objects
@@ -105,12 +126,12 @@ class D2OReader
 		{
 			$oIndex = $indexTable[$k];
 			$this->seek($oIndex);
-			$objects[] = $this->readObject( $classes[$this->readInt() - 1]);
+			$objects[] = $this->readObject( $this->classes[$this->readInt() - 1]);
 		}
 		
 		
 		return array (
-			'def' => $classes,
+			'def' => $this->classes,
 			'data' => $objects
 		);
 	}
