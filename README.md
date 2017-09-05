@@ -10,13 +10,13 @@ WIP - Should be able to:
 Using: 
 
 ```
-$d2o = new D2OReader('d2o/AbuseReasons.d2o');
-$d2o->json();
+$d2o = new D2OReader('d2o/Jobs.d2o');
+$data = $d2o->json();
 ```
 
 ```
-$d2o = new D2OWriter('d2o/AbuseReasons.json');
-$d2o->d2o();
+$d2o = new D2OWriter('d2o/Jobs.json');
+$data = $d2o->d2o();
 ```
 
 
