@@ -10,17 +10,17 @@ WIP - Should be able to:
 Using: 
 
 ```
-$d2o = new D2OReader('d2o/Jobs.d2o');
-$data = $d2o->json();
+$D2o = new D2OReader('d2o/Jobs.d2o');
+$data = $D2o->json();
 ```
 
 ```
-$d2o = new D2OWriter('d2o/Jobs.json');
-$data = $d2o->d2o();
+$D2o = new D2OWriter('d2o/Jobs.json'); // Work in progress/TODO
+$data = $D2o->d2o();
 ```
 
 
-# Example of json output
+# Example of json output (Jobs.d2o)
 
 ```
 {
