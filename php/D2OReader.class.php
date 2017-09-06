@@ -4,13 +4,13 @@ class D2OReader
 {
 	private static $D2OFieldType = array
 	(
-		'-1' => 	array('Int', 		'readInt'),
-		'-2' => 	array('Bool', 		'readBool'),
-		'-3' => 	array('String', 	'readUtf'),
-		'-4' => 	array('Double', 	''),
-		'-5' => 	array('I18N', 		'readInt'),
-		'-6' => 	array('UInt', 		'readShort'),
-		'-99' => 	array('List', 		'readList')
+		-1 		=> 	array('Int', 		'readInt'),
+		-2 		=> 	array('Bool', 		'readBool'),
+		-3 		=> 	array('String', 	'readUtf'),
+		-4 		=> 	array('Double', 	'readDouble'),
+		-5 		=> 	array('I18N', 		'readInt'),
+		-6 		=> 	array('UInt', 		'readShort'),
+		-99 	=> 	array('List', 		'readList')
 	);
 	private $offset = 0;
 	private $data;
@@ -21,6 +21,7 @@ class D2OReader
 	private function readBool() { return !!$this->read(1); }
 	private function readInt() { $r=unpack('N', $this->read(4)); return $r[1]; }
 	private function readShort() { $r=unpack('n', $this->read(2)); return $r[1]; }
+	private function readDouble() { $r=unpack('d', $this->read(8)); return $r[1]; }
 	private function readUtf() { return $this->read( $this->readShort() ); }
 	private function readVector(&$ret) {
 		$ret[] = $v = array(
@@ -44,7 +45,7 @@ class D2OReader
 				if($c != null) $c = $this->readObject($c);
 				$ret[] = $c;
 			} else {
-				$func =  self::$D2OFieldType[ ($type.'') ][1];
+				$func =  self::$D2OFieldType[$type][1];
 				$ret[] =  $this->$func($field, $dim+1);
 			}
 		}
@@ -69,7 +70,7 @@ class D2OReader
 				$ret[ $field['name'] ] = $this->readObject( $this->classes[$cId - 1], $this->classes);
 				continue;
 			}
-			$func =  self::$D2OFieldType[ ($fieldType.'') ][1];
+			$func =  self::$D2OFieldType[$fieldType][1];
 			//var_dump($func . ' -> '. $fieldType);
 			
 			
