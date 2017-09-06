@@ -11,8 +11,10 @@ require 'php/D2OReader.class.php';
 
 
 //Convert d2o to json
-$d2o = new D2OReader('d2o/MapCoordinates.d2o');
+$d2o = new D2OReader('d2o/Jobs.d2o');
 $json = $d2o->json();
+
+//Output
 var_dump($json);
 
 
